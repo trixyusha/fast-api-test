@@ -145,7 +145,7 @@ async def create_task(current_user: Annotated[User, Depends(get_current_user)], 
     db_task = Task(TaskName=task.name, TaskDescription=task.description, CreateDate=datetime.now(), Author=current_user.ID)
     db.add(db_task)
     db.commit()
-    return {'update': f'Задача добавлена'}
+    return db_task
 
 @app.put('/tasks/{task_id}')
 async def update_task(task_id: int, current_user: Annotated[User, Depends(get_current_user)], 
@@ -167,7 +167,7 @@ async def update_task(task_id: int, current_user: Annotated[User, Depends(get_cu
 
 @app.delete('/tasks/{task_id}')
 async def delete_task(task_id: int, tasks_id: Annotated[list, Depends(get_current_user_tasks)], db: db_depend):
-    if tasks_id not in tasks_id:
+    if task_id not in tasks_id:
         raise HTTPException(status_code=400, detail=f'Нет прав на удаление этой ({task_id}) задачи')
     task_db = db.scalar(select(Task).where(Task.ID == task_id))
     if not task_db:
